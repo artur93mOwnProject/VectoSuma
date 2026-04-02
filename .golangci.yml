@@ -1,3 +1,4 @@
+<<<<<<< chore/ci-actions
 version: "2"
 run:
   modules-download-mode: vendor
@@ -74,3 +75,88 @@ formatters:
       - third_party$
       - builtin$
       - examples$
+=======
+run:
+  # Use vendor directory for downloading modules
+  modules-download-mode: vendor
+  # Default timeout is 1m, increasing to 5m to avoid timeouts on larger codebases
+  timeout: 5m
+
+linters:
+  # Disable all default linters to strictly control which ones are used
+  disable-all: true
+  enable:
+    - dupl # Tool for code clone detection
+    - errcheck # Checks for unchecked errors in Go programs
+    - gocognit # Computes and checks the cognitive complexity of functions
+    - goconst # Finds repeated strings that could be replaced by a constant
+    - gocyclo # Computes and checks the cyclomatic complexity of functions
+    - govet # Examines Go source code and reports suspicious constructs
+    - ineffassign # Detects when assignments to existing variables are not used
+    - lll # Reports long lines
+    - revive # Fast, configurable linter (drop-in replacement for old golint)
+    - staticcheck # State-of-the-art linter; finds bugs and enforces style rules
+    - unconvert # Removes unnecessary type conversions
+    - unused # Checks Go code for unused constants, variables, functions, and types
+    # - goimports # Uncomment to enable formatting and import sorting (replaces old 'formatters' section)
+
+linters-settings:
+  gocognit:
+    # Minimal code complexity to report (default is 30, strictly set to 15 here)
+    min-complexity: 15
+  gocyclo:
+    # Minimal code complexity to report (default is 30, strictly set to 15 here)
+    min-complexity: 15
+  lll:
+    # Max line length, lines longer will be reported (default is 120)
+    line-length: 150
+    # Tab width in spaces (default is 1)
+    tab-width: 4
+  revive:
+    # Ignore files that have auto-generated headers to prevent false positives
+    ignore-generated-header: true
+    # Default severity for issues found by revive
+    severity: warning
+
+issues:
+  # Excluding configuration (can be per-path, per-linter, per-text)
+  exclude-rules:
+    # Exclude specific linters for test files
+    - path: _test\.go
+      linters:
+        - dupl
+        - errcheck
+        - gocognit
+        - goconst
+        - gocyclo
+        - ineffassign
+
+    # Exclude revive linter for mock test files
+    - path: _mock_test\.go
+      linters:
+        - revive
+
+    # Exclude complexity, line length, and revive checks for the config directory
+    - path: config/configor
+      linters:
+        - gocognit
+        - gocyclo
+        - lll
+        - revive
+
+    # Ignore errors on specific functions (like Close, Flush, std(out|err)) as it's often OK to ignore them
+    - text: "Error return value of .((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|.*printf?|os\\.(Un)?Setenv). is not checked"
+      linters: [errcheck]
+
+    # False positive when tests are defined in package 'test'
+    - text: "func name will be used as test\\.Test.* by other packages"
+      linters: [revive]
+
+    # Common false positives for govet (unsafe.Pointer misuse)
+    - text: "(possible misuse of unsafe.Pointer|should have signature)"
+      linters: [govet]
+
+    # Ignore annoying issue about not having a package comment
+    - text: "should have a package comment"
+      linters: [revive]
+>>>>>>> main
